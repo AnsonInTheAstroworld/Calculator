@@ -50,22 +50,34 @@ double Calculator::calculateLine(string line) {
             i--;
             formula+=' ';
         }
+        else if(line[i]=='-'&&(i==0||line[i-1]<'0'||line[i-1]>'9')){
+            formula+='-';
+        }
         else{//is symbol
             while(!symbols.empty()&&icp[line[i]]<=isp[symbols.top()]){
-                if(symbols.top()!='('&&symbols.top()!=')')
+                if(symbols.top()=='('){
+                    symbols.pop();
+                    break;
+                }
+                else{
                     formula+=symbols.top();
-                symbols.pop();
+                    formula+=' ';
+                    symbols.pop();
+                }
             }
-            symbols.push(line[i]);
+            if(line[i]!=')')
+                symbols.push(line[i]);
         }
     }
     while(!symbols.empty()){
-        if(symbols.top()!='('&&symbols.top()!=')')
-            formula+=symbols.top();
+        if(symbols.top()!='('&&symbols.top()!=')'){
+            formula+=symbols.top();formula+=' ';
+        }
         symbols.pop();
     }
 
     stack<double> calculation;
+    bool isNegative=false;
     for(int i=0;i<formula.size();i++){
         if(formula[i]>='0'&&formula[i]<='9'){
             double integral=0,fractional=0;
@@ -74,7 +86,7 @@ double Calculator::calculateLine(string line) {
                 integral+=formula[i]-'0';
                 i++;
             }
-            if(line[i]=='.'){
+            if(formula[i]=='.'){
                 i++;
                 while(i<formula.size()&&formula[i]>='0'&&formula[i]<='9'){
                     fractional*=10;
@@ -83,16 +95,21 @@ double Calculator::calculateLine(string line) {
                 }
             }
             while(fractional>=1) fractional/=10;
-            calculation.push(integral+fractional);
+            if(isNegative){
+                calculation.push(-integral-fractional);
+                isNegative=false;
+            }
+            else
+                calculation.push(integral+fractional);
         }
-        else{
+        else if(formula[i]=='-'&&formula[i+1]>='0'&&formula[i+1]<='9'){
+            isNegative=true;
+        }
+        else if(formula[i]!=' '){
             double num1= calculation.top();
             calculation.pop();
-            double num2=0;
-            if(!calculation.empty()){
-                num2= calculation.top();
-                calculation.pop();
-            }
+            double num2=calculation.top();
+            calculation.pop();
             if(formula[i]=='+') calculation.push(num2+num1);
             else if(formula[i]=='-') calculation.push(num2-num1);
             else if(formula[i]=='*') calculation.push(num2*num1);

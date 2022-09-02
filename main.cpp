@@ -2,7 +2,12 @@
 #include "Calculator.h"
 
 int main() {
-    Calculator calculator;
-    calculator.calculate("D:\\MyProject\\Calculator\\exp.txt");
+    while(1){
+        cout<<"Please type in file name"<<endl;
+        string fileName;
+        cin>>fileName;
+        Calculator calculator;
+        calculator.calculate(fileName);
+    }
     return 0;
 }
